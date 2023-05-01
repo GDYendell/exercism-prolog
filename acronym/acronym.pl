@@ -1,70 +1,25 @@
-% Convert string sentence to string acronym
-% String -> String
 abbreviate(Sentence, Acronym) :-
-    % Find List of words that concatenate to given sentence
-    atomic_list_concat(
-        SentenceWords1, % Result
-        ' ',  % Separator
-        Sentence  % Input
+    % Split string to list of words
+    split_string(
+        Sentence,  % Input
+        " -",  % Separator - Split by ' ' or '-'
+        " -_",  % Padding  - Strip any additional ' ', '-' or '_' from words
+        Words  % Result
     ),
-
-    % Split any hyphenated words in the List
-    maplist(split_hyphenated, SentenceWords1, SentenceWords2),
-    % and flatten the List again
-    flatten(SentenceWords2, SentenceWords),
-
-    % Find List of first letters of given List of words
-    do_abbreviate(
-        SentenceWords,  % Input
-        AcronymLetters  % Result
+    % Map list of words to list of each word's first character
+    maplist(
+        take_first,
+        Words,  % Input
+        AcronymChars  % Result
     ),
-
-    % Concatenate List of characters
-    atomic_list_concat(
-        AcronymLetters,  % Input
-        AcronymAtom  % Result
+    % Concatenate characters to string
+    string_chars(
+        AcronymString,  % Result
+        AcronymChars  % Input
     ),
-
-    % Convert Atom -> uppercase String
-    atom_string(AcronymAtom, AcronymString),
+    % Capitalise string and bind it to the result
     string_upper(AcronymString, Acronym).
 
-% Convert each word of sentence to one letter
-% List -> List
-do_abbreviate([FirstWord|SentenceTail], [FirstLetter|AcronymTail]) :-
-    % Split first word into characters
-    atom_chars(
-        FirstWord,  % Input
-        WordCharacters  % Result
-    ),
-
-    % Bind first alphabetic character in the word to the list of letters
-    first_alpha(WordCharacters, FirstLetter),
-
-    % Recursively abbreviate the tail
-    do_abbreviate(
-        SentenceTail,  % Input
-        AcronymTail  % Result
-    ).
-
-% End recursion when Lists exhausted
-do_abbreviate([], []).
-
-% Find first alphabetic character in list of characters
-first_alpha([FirstCharacter|CharactersTail], FirstAlpha) :-
-    char_type(FirstCharacter, alpha) ->
-        FirstAlpha = FirstCharacter ;
-        first_alpha(CharactersTail, FirstAlpha).
-
-% End recursion when List exhausted - bind an empty string
-first_alpha([], FirstAlpha) :-
-    FirstAlpha = ''.
-
-% Split a hyphenated word into a list of its parts
-split_hyphenated(Word, WordParts) :-
-    % Find list of words that form hyphenated word
-    atomic_list_concat(
-        WordParts, % Result
-        '-',  % Separator
-        Word  % Input
-    ).
+take_first(Word, FirstChar) :-
+    % Split word to list of characters and pattern match to bind the first to the result
+    string_chars(Word, [FirstChar|_]).
