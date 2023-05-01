@@ -13,7 +13,7 @@
             "env": {},
             "program": "${file}",
             "cwd": "${fileDirname}",
-            "startupQuery": "hello_world",
+            "startupQuery": "start",
             "stopOnEntry": true,
             "traceCmds": {
                 "continue": [
